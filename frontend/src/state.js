@@ -1,20 +1,22 @@
-import {createStore} from "vuex";
+import { createStore } from "vuex";
 import router from "./router";
 
 const store = createStore({
   state: {
     user: null,
-    token: null,
+    token: localStorage.getItem('token') || null,
     preLoading: false,
     dataPreLoading: true,
     loginError: false,
-    loggedIn: false,
+    loggedIn: !!localStorage.getItem('token'),
     rating: [],
     pager: {
       currentPage: 1,
       perPage: 5,
       total: 0
-    }
+    },
+    validation: {},
+    createRatingDialogVisible: false,
   },
   mutations: {
     setToken(state, token) {
@@ -47,6 +49,12 @@ const store = createStore({
     setPerPage(state, rows) {
       state.pager.perPage = rows;
     },
+    setValidation(state, validation) {
+      state.validation = validation;
+    },
+    setCreateRatingDialogVisible(state, visible) {
+      state.createRatingDialogVisible = visible;
+    },
     logout(state) {
       state.user = null;
       state.token = null;
@@ -54,39 +62,32 @@ const store = createStore({
       state.rating = [];
       localStorage.removeItem('token');
       router.push('/');
-    }
+    },
   },
   actions: {
-    // ЗАГЛУШКА: вход без бэкенда
-    auth({ commit }, {login, password}) {
+    // ЗАГЛУШКА: вход
+    auth({ commit }, { login, password }) {
       commit('setPreloading', true);
-      
       setTimeout(() => {
         const fakeToken = 'fake_token_' + Date.now();
         commit('setToken', fakeToken);
         localStorage.setItem('token', fakeToken);
         commit('setLoggedIn', true);
         commit('setLoginError', false);
-        commit('setUser', {
-          username: login || 'admin',
-          id: 1
-        });
+        commit('setUser', { username: login || 'admin', id: 1 });
         commit('setPreloading', false);
         router.push('/');
       }, 500);
     },
-    
+
     // ЗАГЛУШКА: получение пользователя
     getUser({ commit }) {
       commit('setPreloading', false);
-      router.push('/');
     },
-    
+
     // ЗАГЛУШКА: получение рейтинга с тестовыми данными
     getRating({ state, commit }) {
       commit('setDataPreloading', true);
-      
-      // Тестовые данные как на скриншоте
       const mockData = [
         { name: 'Тимофей', gender: 1, birthday: '2018-12-15' },
         { name: 'Елизавета', gender: 2, birthday: '2019-05-20' },
@@ -97,17 +98,27 @@ const store = createStore({
         { name: 'Артем', gender: 1, birthday: '2020-12-01' },
         { name: 'Стёпа', gender: 1, birthday: '2021-07-10' },
       ];
-      
       setTimeout(() => {
         commit('setRating', mockData);
         commit('setPager', {
           currentPage: 1,
           perPage: state.pager.perPage,
-          totalPages: 1,
           total: mockData.length
         });
         commit('setDataPreloading', false);
       }, 500);
+    },
+
+    // ЗАГЛУШКА: создание рейтинга — просто открывает/закрывает модалку
+    createRating({ commit }, { name, description, birthday, gender }) {
+      console.log('Mock create rating:', { name, description, birthday, gender });
+      commit('setValidation', {});
+      commit('setCreateRatingDialogVisible', false);
+    },
+
+    // ЗАГЛУШКА: удаление — ничего не делает
+    deleteRating({ commit }, { id }) {
+      console.log('Mock delete rating id:', id);
     }
   }
 });

@@ -1,4 +1,4 @@
-<<template>
+<template>
   <h1 class="text-center">Рейтинги</h1>
   
   <div v-if="store.state.dataPreLoading" style="text-align: center">

@@ -1,28 +1,25 @@
 <template>
   <div id="app">
-    <Menu></Menu>
-    <router-view></router-view>
+    <Menu />
+    <router-view />
+    <CreateRating />
   </div>
 </template>
 
-<script>
-import store from "./state";
-import Menu from "./components/Menu";
+<script setup>
+import { onMounted } from 'vue'
+import { useStore } from 'vuex'
+import Menu from './components/Menu.vue'
+import CreateRating from './components/CreateRating.vue'
 
-export default {
-  components: { Menu },
-  computed: {
-    user() {
-      return this.$store.state.user;
-    },
-  },
-  mounted() {
-    const token = localStorage.getItem('token');
-    if (token) {
-      store.commit('setToken', token);
-      store.commit('setLoggedIn', true);
-      this.$store.dispatch('getUser');
-    }
+const store = useStore()
+
+onMounted(() => {
+  const token = localStorage.getItem('token')
+  if (token) {
+    store.commit('setToken', token)
+    store.commit('setLoggedIn', true)
+    store.dispatch('getUser')
   }
-};
+})
 </script>

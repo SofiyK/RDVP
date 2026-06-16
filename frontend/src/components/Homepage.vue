@@ -2,15 +2,15 @@
   <h1>Домашняя страница</h1>
 </template>
 
-<script>
-import '../state.js'
+<script setup>
+import { onMounted } from 'vue'
+import { useStore } from 'vuex'
 
-export default {
-  name: "Homepage",
-  mounted() {
-    this.$store.commit('setLoginError', false)
-  }
-}
+const store = useStore()
+
+onMounted(() => {
+  store.commit('setLoginError', false)
+})
 </script>
 
 <style scoped>

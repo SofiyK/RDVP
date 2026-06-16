@@ -15,10 +15,6 @@ import Menubar from 'primevue/menubar'
 const store = useStore()
 const router = useRouter()
 
-const login = ref('administrator')
-const password = ref('password')
-const brand = import.meta.env.VITE_APP_APPNAME
-
 const username = computed(() => {
   return store.state.user?.username ?? ''
 })
@@ -29,7 +25,7 @@ const items = ref([
   {
     label: 'Рейтинг',
     icon: 'pi pi-fw pi-chart-line',
-    visible: false,
+    visible: false, // будет обновлено через watch
     items: [
       {
         label: 'Все рейтинги',
@@ -39,6 +35,9 @@ const items = ref([
       {
         label: 'Создать рейтинг',
         icon: 'pi pi-fw pi-plus',
+        command: () => {
+          store.commit('setCreateRatingDialogVisible', true)
+        }
       },
     ]
   },
@@ -62,20 +61,29 @@ const items = ref([
   },
 ])
 
-watch(username, (newUsername) => {
-  items.value[1].label = newUsername
+// Функция обновления видимости
+function updateMenuVisibility(loggedIn) {
+  if (loggedIn) {
+    items.value[0].visible = true   // Рейтинг
+    items.value[1].visible = true   // Пользователь
+    items.value[2].visible = false  // Вход
+  } else {
+    items.value[0].visible = false  // Рейтинг
+    items.value[1].visible = false  // Пользователь
+    items.value[2].visible = true   // Вход
+  }
+}
+
+// Обновляем при изменении
+watch(isLoggedIn, (loggedIn) => {
+  updateMenuVisibility(loggedIn)
 })
 
-watch(isLoggedIn, (loggedIn) => {
-  if (loggedIn) {
-    items.value[0].visible = true
-    items.value[2].visible = false
-    items.value[1].visible = true
-  } else {
-    items.value[0].visible = false
-    items.value[2].visible = true
-    items.value[1].visible = false
-  }
+// Обновляем сразу при загрузке (важно!)
+updateMenuVisibility(isLoggedIn.value)
+
+watch(username, (newUsername) => {
+  items.value[1].label = newUsername
 })
 
 function logout() {
