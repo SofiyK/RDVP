@@ -1,132 +1,115 @@
 import {createStore} from "vuex";
 import router from "./router";
 
-const backendUrl = process.env.VUE_APP_BACKEND_URL;
-const client_id = process.env.VUE_APP_CLIENT_ID;
-const client_secret = process.env.VUE_APP_CLIENT_SECRET;
 const store = createStore({
   state: {
-    user: {},
-
-
-
-
+    user: null,
     token: null,
     preLoading: false,
+    dataPreLoading: true,
     loginError: false,
     loggedIn: false,
-    rating: {},
+    rating: [],
     pager: {
       currentPage: 1,
       perPage: 5,
+      total: 0
     }
   },
-mutations: {
-  setToken(state, token) {
-    state.token = token;
-  },
-
-  getToken(context, token) {
-    context.token = token;
-  },
-
-  setUser(context, user) {
-    context.user = user;
-  },
-
-  setPreloading(context, is_load) {
-    context.preLoading = is_load;
-  },
-  setLoginError(context, isError) {
-    context.loginError = isError;
-  },
-  setLoggedIn(context, isLoggedIn) {
-    context.loggedIn = isLoggedIn;
-  },
-  setRating(context, rating) {
-    context.rating = rating;
-  },
-  setPage(context, page) {
-    context.pager.currentPage = page;
-  },
-  setPager(context, pager) {
-    context.pager = pager;
-  },
-  logout(context) {
-
-    context.user = null;
-    context.token = null;
-    context.loggedIn = false;
-    context.rating = {};
-    localStorage.removeItem('token')
-    router.push('/')
-  },
-},
-actions: {
-  auth(context, {login, password}) {
-
-    context.commit('setPreloading', true)
-    window.axios.post(backendUrl + '/OAuthController/Authorize', {
-      username: login,
-      password: password,
-      grant_type: 'password'
-    }, {
-      headers: {
-        Authorization: 'Basic ' + window.btoa(client_id + ':' + client_secret)
-      }
-
-
-
-
-    }).then((response) => {
-      if (response.data.access_token) {
-        context.commit('setToken', response.data.access_token)
-        localStorage.setItem('token', response.data.access_token);
-        context.commit('setLoggedIn', true);
-        context.commit('setLoginError', false);
-        context.dispatch('getUser');
-      } else {
-        context.commit('setLoginError', true)
-        context.commit('setPreloading', false)
-      }
-    })
-
-  },
-  getUser(context) {
-    // context.commit('setPreloading', true);
-    console.log('get user')
-    return window.axios.get(backendUrl + '/OAuthController/user', {
-      headers: {
-        Authorization: 'Bearer ' + context.state.token
-      }
-    }).then((response) => {
-      context.commit('setUser', response.data);
-      context.commit('setPreloading', false);
-
-    }).catch(error => {
-      if (error.response) context.commit('setLoggedIn', false);
+  mutations: {
+    setToken(state, token) {
+      state.token = token;
+    },
+    setUser(state, user) {
+      state.user = user;
+    },
+    setPreloading(state, is_load) {
+      state.preLoading = is_load;
+    },
+    setDataPreloading(state, is_load) {
+      state.dataPreLoading = is_load;
+    },
+    setLoginError(state, isError) {
+      state.loginError = isError;
+    },
+    setLoggedIn(state, isLoggedIn) {
+      state.loggedIn = isLoggedIn;
+    },
+    setRating(state, rating) {
+      state.rating = rating;
+    },
+    setPage(state, page) {
+      state.pager.currentPage = page;
+    },
+    setPager(state, pager) {
+      state.pager = pager;
+    },
+    setPerPage(state, rows) {
+      state.pager.perPage = rows;
+    },
+    logout(state) {
+      state.user = null;
+      state.token = null;
+      state.loggedIn = false;
+      state.rating = [];
+      localStorage.removeItem('token');
+      router.push('/');
     }
-    )
-
   },
-  getRating(context) {
-    console.log('get rating')
-    const params = new URLSearchParams()
-    params.append('per_page', context.state.pager.perPage)
-    return window.axios.post(backendUrl + '/RatingApi/rating?page_group1=' + context.state.pager.currentPage, params,
-      {
-        headers: {
-          Authorization: 'Bearer ' + context.state.token
-        },
-      }).then((response) => {
-        context.commit('setRating', response.data.ratings);
-        context.commit('setPager', response.data.pager);
-        console.log(response.data.ratings)
-        console.log(response.data.pager)
-
-      })
+  actions: {
+    // ЗАГЛУШКА: вход без бэкенда
+    auth({ commit }, {login, password}) {
+      commit('setPreloading', true);
+      
+      setTimeout(() => {
+        const fakeToken = 'fake_token_' + Date.now();
+        commit('setToken', fakeToken);
+        localStorage.setItem('token', fakeToken);
+        commit('setLoggedIn', true);
+        commit('setLoginError', false);
+        commit('setUser', {
+          username: login || 'admin',
+          id: 1
+        });
+        commit('setPreloading', false);
+        router.push('/');
+      }, 500);
+    },
+    
+    // ЗАГЛУШКА: получение пользователя
+    getUser({ commit }) {
+      commit('setPreloading', false);
+      router.push('/');
+    },
+    
+    // ЗАГЛУШКА: получение рейтинга с тестовыми данными
+    getRating({ state, commit }) {
+      commit('setDataPreloading', true);
+      
+      // Тестовые данные как на скриншоте
+      const mockData = [
+        { name: 'Тимофей', gender: 1, birthday: '2018-12-15' },
+        { name: 'Елизавета', gender: 2, birthday: '2019-05-20' },
+        { name: 'Кеша', gender: 1, birthday: '2020-11-10' },
+        { name: 'Олег', gender: 1, birthday: '2021-09-01' },
+        { name: 'Уля', gender: 2, birthday: '2021-09-15' },
+        { name: 'Маша', gender: 2, birthday: '2021-08-20' },
+        { name: 'Артем', gender: 1, birthday: '2020-12-01' },
+        { name: 'Стёпа', gender: 1, birthday: '2021-07-10' },
+      ];
+      
+      setTimeout(() => {
+        commit('setRating', mockData);
+        commit('setPager', {
+          currentPage: 1,
+          perPage: state.pager.perPage,
+          totalPages: 1,
+          total: mockData.length
+        });
+        commit('setDataPreloading', false);
+      }, 500);
+    }
   }
-}
-})
+});
 
 export default store;
