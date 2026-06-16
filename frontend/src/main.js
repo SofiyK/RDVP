@@ -1,3 +1,9 @@
+import PrimeVue from 'primevue/config';
+import 'primevue/resources/themes/bootstrap4-light-blue/theme.css';
+import 'primeicons/primeicons.css';
+import 'primeflex/primeflex.css';
+import 'primevue/resources/primevue.min.css';
+
 import { createApp } from 'vue'
 import axios from 'axios';
 import router from './router.js'
@@ -6,6 +12,8 @@ import store from './state.js';
 
 const myApp = createApp(App);
 window.axios = axios;
-myApp.use(store)
-myApp.use(router)
+
+myApp.use(store);
+myApp.use(router);
+myApp.use(PrimeVue);
 myApp.mount('#app');
