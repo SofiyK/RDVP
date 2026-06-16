@@ -1,26 +1,39 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div id="app">
+    <div v-if="!this.$store.state.preLoading">
+      <router-view></router-view>
+    </div>
+    <div v-else>
+      Загрузка...
+    </div>
+  </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import store from "./state";
+import router from "./router";
 
 export default {
-  name: 'App',
-  components: {
-    HelloWorld
+  computed: {
+    user(){
+      return this.$store.state.user;
+    },
+  },
+  watch: {
+    user(){
+      if(this.user){
+        router.push('/')
+      } else {
+        router.push('/signin')
+      }
+    }
+  },
+  mounted() {
+    const token = localStorage.getItem('token');
+    if(token){
+      store.commit('setToken', token);
+    }
+    this.$store.dispatch('getUser')
   }
-}
+};
 </script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
