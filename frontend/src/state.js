@@ -60,15 +60,26 @@ const store = createStore({
         },
         getUser(context){
             context.commit('setPreloading', true);
-            console.log('get user')
-            return window.axios.get(backendUrl+'/OAuthController/user', {
+            console.log('get user, token:', context.state.token);
+
+            if (!context.state.token) {
+                context.commit('setPreloading', false);
+                context.commit('setUser', null);
+                return Promise.resolve();
+            }
+
+            return axios.get(backendUrl+'/OAuthController/user', {
                 headers: {
                     Authorization: 'Bearer ' + context.state.token
                 }
             }).then((response) => {
                 context.commit('setUser', response.data);
                 context.commit('setPreloading', false);
-            })
+            }).catch((error) => {
+                console.error('GetUser error:', error);
+                context.commit('setPreloading', false);  // ← ВАЖНО: выключаем загрузку при ошибке
+                context.commit('setUser', null);
+            });
         }
     },
 })
