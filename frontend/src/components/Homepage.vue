@@ -1,8 +1,5 @@
 <template>
-  <div v-if="$store.state.user">
-    Привет, {{$store.state.user.username }}!
-    <button @click="logout">Выйти</button>
-  </div>
+  <h1>Домашняя страница</h1>
 </template>
 
 <script>
@@ -10,15 +7,8 @@ import '../state.js'
 
 export default {
   name: "Homepage",
-  created() {
-    if( !this.$store.state.user.id > 0){
-      this.$router.push('/signin');
-    }
-  },
-  methods: {
-    logout(){
-      this.$store.commit('logout')
-    }
+  mounted() {
+    this.$store.commit('setLoginError', false)
   }
 }
 </script>
